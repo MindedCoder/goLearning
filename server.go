@@ -6,6 +6,6 @@ import (
 
 func main() {
 	fmt.Print("你好 go")
-	rt := router.InitRouter()
-	rt.Run(":8080")
+	router.InitRouter()
+	//rt.Run(":8080")
 }
