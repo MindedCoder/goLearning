@@ -35,10 +35,10 @@ func Cors() gin.HandlerFunc {
 			c.Set("content-type", "application/json")
 		}
 
-		//放行所有OPTIONS方法
-		if method == "OPTIONS" {
-			c.JSON(http.StatusOK, "Options Request!")
-		}
+		////放行所有OPTIONS方法
+		//if method == "OPTIONS" {
+		//	c.JSON(http.StatusOK, "Options Request!")
+		//}
 
 		c.Next()
 	}
