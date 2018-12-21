@@ -1,0 +1,7 @@
+{
+  "databasename" : "12km",
+  "username" : "root",
+  "password" :"Espresso1006",
+  "ip" : "dds-bp1b9f3b23cd79c41211-pub.mongodb.rds.aliyuncs.com",
+  "port" : "3717"
+}
