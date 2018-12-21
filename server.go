@@ -1,12 +1,12 @@
 package main
 import (
-	."goLearning/router"
+	"goLearning/router"
 	"gopkg.in/mgo.v2"
 )
 
 func main() {
 	mgo.SetDebug(true)
 	mgo.SetStats(true)
-	router := InitRouter()
-	router.Run(":8080")
+	rt := router.InitRouter()
+	rt.Run(":8080")
 }
