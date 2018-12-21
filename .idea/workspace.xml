@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="757ca202-27f8-49cc-8350-d6d470aa1b20" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/apis/index.go" afterPath="$PROJECT_DIR$/apis/index.go" />
       <change beforePath="$PROJECT_DIR$/db/dbHelper.go" afterPath="$PROJECT_DIR$/db/dbHelper.go" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -41,8 +40,8 @@
       <file leaf-file-name="dbHelper.go" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/db/dbHelper.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="444">
-              <caret line="36" column="50" lean-forward="true" selection-start-line="36" selection-start-column="50" selection-end-line="36" selection-end-column="50" />
+            <state relative-caret-position="343">
+              <caret line="37" column="32" lean-forward="false" selection-start-line="37" selection-start-column="32" selection-end-line="37" selection-end-column="32" />
               <folding>
                 <element signature="e#19#120#0" expanded="true" />
               </folding>
@@ -566,8 +565,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/db/dbHelper.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="444">
-          <caret line="36" column="50" lean-forward="true" selection-start-line="36" selection-start-column="50" selection-end-line="36" selection-end-column="50" />
+        <state relative-caret-position="343">
+          <caret line="37" column="32" lean-forward="false" selection-start-line="37" selection-start-column="32" selection-end-line="37" selection-end-column="32" />
           <folding>
             <element signature="e#19#120#0" expanded="true" />
           </folding>
