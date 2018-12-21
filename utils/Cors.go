@@ -3,13 +3,13 @@ package utils
 import (
 	"github.com/gin-gonic/gin"
 	"strings"
-	"net/http"
+	//"net/http"
 	"fmt"
 )
 
 func Cors() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		method := c.Request.Method
+		//method := c.Request.Method
 
 		origin := c.Request.Header.Get("Origin")
 		var headerKeys []string
