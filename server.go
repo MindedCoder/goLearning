@@ -1,16 +1,12 @@
 package main
 import (
-	"fmt"
-	"github.com/gin-gonic/gin"
-	."goLearning/apis"
+	"goLearning/router"
+	"gopkg.in/mgo.v2"
 )
 
 func main() {
-	fmt.Print("你好 go")
-	gin.SetMode(gin.ReleaseMode)
-	router := gin.Default()
-	router.OPTIONS("/1.1/functions/12kmCollectStatDatas", DefaultAPI)
-	//router.GET("/users", apis.GetUserAPI)
-	//router.POST("/user", apis.AddPersonAPI)
-	router.Run(":8080")
+	mgo.SetDebug(true)
+	mgo.SetStats(true)
+	rt := router.InitRouter()
+	rt.Run(":8080")
 }
