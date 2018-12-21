@@ -1,12 +1,11 @@
 package main
 import (
 	"fmt"
+	"goLearning/router"
 )
 
 func main() {
 	fmt.Print("你好 go")
-	//mgo.SetDebug(true)
-	//mgo.SetStats(true)
-	//rt := router.InitRouter()
-	//rt.Run(":8080")
+	rt := router.InitRouter()
+	rt.Run(":8080")
 }
