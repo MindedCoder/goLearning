@@ -33,6 +33,7 @@ func (oper * Operater) Connect(info map[string]string) {
 		Username: info["username"],
 		Password: info["password"],
 	}
+	fmt.Println("dialInfo is ", dialInfo)
 	mgo_session, error := mgo.DialWithInfo(dialInfo)
 	oper.mgo_session = mgo_session
 	oper.mgo_db = mgo_session.DB(info["databasename"])
