@@ -8,5 +8,5 @@ func main() {
 	mgo.SetDebug(true)
 	mgo.SetStats(true)
 	rt := router.InitRouter()
-	rt.Run(":5000")
+	rt.Run(":8080")
 }
