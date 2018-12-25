@@ -4,7 +4,7 @@ import(
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"fmt"
-	"goLearning/db"
+	//"goLearning/db"
 )
 
 func DefaultAPI(c *gin.Context)  {
@@ -33,9 +33,13 @@ func GetUserAPI(c *gin.Context)  {
 	params := map[string]string{}
 	params["className"] = "_User"
 	params["id"] = userId
-	op := databases.GetSessionInstance()
-	user := op.GetObject(params)
+	//op := db.GetSessionInstance()
+	//user := op.QueryObjects(map[string]string{}, nil)
 	c.JSON(http.StatusOK, gin.H{
-		"user": user,
+		"user": nil,
 	})
+}
+
+func ConstructParams()  {
+	
 }

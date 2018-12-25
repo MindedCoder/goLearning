@@ -1,11 +1,12 @@
-package databases
+package db
 
 import (
 	"gopkg.in/mgo.v2"
 	"goLearning/utils"
+	"fmt"
 	"goLearning/models"
 	"gopkg.in/mgo.v2/bson"
-	"fmt"
+	"strings"
 )
 var opInstance  *Operater
 
@@ -33,9 +34,7 @@ func (oper * Operater) Connect(info map[string]string) {
 		Username: info["username"],
 		Password: info["password"],
 	}
-	fmt.Println("dialInfo is ", dialInfo)
 	mgo_session, error := mgo.DialWithInfo(dialInfo)
-	fmt.Println("error is ", error)
 	oper.mgo_session = mgo_session
 	oper.mgo_db = mgo_session.DB(info["databasename"])
 	if error != nil {
@@ -48,11 +47,93 @@ func GetSessionInstance() *Operater{
 	return opInstance
 }
 
-func (op *Operater)GetObject(params map[string]string) models.User{
-	collection := opInstance.mgo_db.C(params["className"])
-	ps := models.User{}
-	collection.Find(bson.M{"_id": bson.ObjectIdHex(params["id"])}).One(&ps)
-	return ps
+func (op *Operater)QueryObject(queryModel models.QueryModel, params map[string]string) bson.M{
+	collection := op.mgo_db.C(params["className"])
+	mapInfo,_ := utils.Json2map(queryModel.Where, true)
+	var result = bson.M{}
+	m := []bson.M{
+		{"$match": mapInfo},
+	}
+	collection.Pipe(m).One(&result)
+	includes := strings.Split(queryModel.Include, ",")
+	return IncludeObject(result, includes, opInstance.mgo_db)
 }
 
+func (op *Operater)QueryObjects(queryModel models.QueryModel, params map[string]string) []bson.M{
+	collection := op.mgo_db.C(params["className"])
+	mapInfo, _ := utils.Json2map(queryModel.Where, true)
+	var result = []bson.M{}
+	var limit = 10
+	var skip = 0
+	if queryModel.Limit > 0{
+		limit = queryModel.Limit
+	}
+	if queryModel.Skip > 0{
+		skip = queryModel.Skip
+	}
+	m := []bson.M{
+		{"$match": mapInfo},
+		{"$limit": limit},
+		{"$skip" : skip},
+	}
+	collection.Pipe(m).All(&result)
+	includes := strings.Split(queryModel.Include, ",")
+	return IncludeObjects(result, includes, opInstance.mgo_db)
+}
 
+func (op *Operater) DeleteObject(params map[string]string) error{
+	collection := op.mgo_db.C(params["className"])
+	err := collection.RemoveId(bson.ObjectIdHex(params["objectId"]))
+	return err
+}
+
+func (op *Operater) DeleteObjects(params map[string]interface{}) error {
+	var objects = params["objectIds"].([]string)
+	for _, id := range objects {
+		var payload = map[string]string{
+			"objectId": id,
+			"className": params["className"].(string),
+		}
+		error := op.DeleteObject(payload)
+		if error != nil {
+			return error
+			break
+		}
+	}
+	return nil
+}
+
+func (op *Operater) AddObject(params map[string]interface{}) error  {
+	collection := op.mgo_db.C(params["className"].(string))
+	err := collection.Insert(params["document"])
+	return  err
+}
+
+func (op *Operater) AddObjects(params map[string]interface{}) error  {
+	var documents = params["documents"].([]map[string]string)
+	for _, document := range documents {
+		var payload = map[string]interface{}{
+			"className": params["className"],
+			"document": document,
+		}
+		error := op.AddObject(payload)
+		if error != nil {
+			return error
+			break
+		}
+	}
+	return nil
+}
+
+func (op *Operater) UpdateObject(params map[string]interface{}) error  {
+	collection := op.mgo_db.C(params["className"].(string))
+	var id = params["objectId"]
+	delete(params, "objectId")
+	delete(params, "className")
+	err := collection.UpdateId(bson.ObjectIdHex(id.(string)), bson.M{"$set": params})
+	return  err
+}
+
+//func (op *Operater) updateObjects(params map[string]string) error  {
+//
+//}
