@@ -5,9 +5,12 @@ import(
 	"net/http"
 	"fmt"
 	//"goLearning/db"
+	"io/ioutil"
 )
 
 func DefaultAPI(c *gin.Context)  {
+	data, _ := ioutil.ReadAll(c.Request.Body)
+	fmt.Printf("ctx.Request.body: %v", string(data))
 	c.JSON(http.StatusOK, gin.H{
 		"status": "1234",
 	})
@@ -40,6 +43,3 @@ func GetUserAPI(c *gin.Context)  {
 	})
 }
 
-func ConstructParams()  {
-	
-}

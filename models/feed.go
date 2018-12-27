@@ -45,4 +45,20 @@ type Feed struct {
 
 type Article struct {
 	Id 				      bson.ObjectId  `bson:"_id" json:"objectId"`
-} 
+}
+
+func TranspileFeedModel(m bson.M) Feed {
+	data, _ := bson.Marshal(&m)
+	value := Feed{}
+	bson.Unmarshal(data, &value)
+	return value
+}
+
+func TranspileFeedModels(m []bson.M) []Feed {
+	var feeds = []Feed{}
+	for _, feed := range m {
+		transpiledFeed := TranspileFeedModel(feed)
+		feeds = append(feeds, transpiledFeed)
+	}
+	return feeds
+}
