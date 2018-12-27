@@ -13,8 +13,30 @@ import (
 )
 
 
+func IncludeObjects(m []bson.M, includes []string, db *mgo.Database) []bson.M {
+	var objects = []bson.M{}
+	objectChans := make([]chan bson.M, len(m))
+	for i, obj := range m {
+		objectChans[i] = make(chan bson.M)
+		go func(k int, obj bson.M) {
+			data :=  IncludeObject(obj, includes, db)
+			objectChans[k] <- data
+		}(i, obj)
+	}
+	for _, ch := range objectChans {
+		data := <-ch
+		objects = append(objects, data)
+	}
+	return objects
+}
+
+
 /**
-	may try loop 3 or more ,like creator.detail.school
+	获取某个对象的各种引用
+	@params m 对象本身
+	@params includes 需要引用的字段
+	@params db 数据库连接对象
+	@return 返回一个已经fetch过值的对象
  */
 func IncludeObject(m bson.M, includes []string, db *mgo.Database) bson.M{
 	//first filter includes  due to include may be "creator.detail"
@@ -28,22 +50,7 @@ func IncludeObject(m bson.M, includes []string, db *mgo.Database) bson.M{
 		} else {
 			refs = append(refs, m[include])
 		}
-		var defaultResults = []bson.M{}
-		//遍历ref获取值
-		for _, _r := range refs {
-			var obj = bson.M{}
-			var ref mgo.DBRef
-			data, _:= bson.Marshal(_r)
-			bson.Unmarshal(data, &ref)
-			db.FindRef(&ref).One(&obj)
-
-			for key, value := range includeMap{
-				if key == include {
-					obj = IncludeObject(obj, value, db)
-				}
-			}
-			defaultResults = append(defaultResults, obj)
-		}
+		var defaultResults = scanAndFetchRef(refs, db, include, includeMap)
 		//如果是数组，那么直接复制 非数组则取第一个值
 		if isArrayParameters {
 			m[include] = defaultResults
@@ -54,22 +61,33 @@ func IncludeObject(m bson.M, includes []string, db *mgo.Database) bson.M{
 	return m
 }
 
-func IncludeObjects(m []bson.M, includes []string, db *mgo.Database) []bson.M {
-	var objects = []bson.M{}
-	for _, obj := range m {
-		objects = append(objects, IncludeObject(obj, includes, db))
+func scanAndFetchRef(refs []interface{}, db *mgo.Database, include string, includeMap map[string][]string) []bson.M{
+	//遍历ref获取值
+	var defaultResults = []bson.M{}
+	for _, _r := range refs {
+		var obj = bson.M{}
+		var ref mgo.DBRef
+		data, _:= bson.Marshal(_r)
+		bson.Unmarshal(data, &ref)
+		db.FindRef(&ref).One(&obj)
+		for key, value := range includeMap{
+			if key == include {
+				obj = IncludeObject(obj, value, db)
+			}
+		}
+		defaultResults = append(defaultResults, obj)
 	}
-	return objects
+	return defaultResults
 }
 
 /**
-	example: ["creator", "creator.detail"]
+	example: ["creator", "creator.detail", "feed.creator.detail"]
  */
 func filterIncludes(includes []string) ([]string, map[string][]string) {
 	var filterArray = []string{}
 	var filterMap = map[string][]string{}
 	for _, include:= range includes {
-		array := strings.Split(include, ".")
+		array := strings.SplitN(include, ".", 2)
 		filterArray = append(filterArray, array[0])
 		if len(array) > 1 {
 			if _, ok := filterMap[array[0]]; ok {

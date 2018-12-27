@@ -45,6 +45,16 @@ type Feed struct {
 
 type Article struct {
 	Id 				      bson.ObjectId  `bson:"_id" json:"objectId"`
+	Active 				  int            `bson:"active" json:"active"`
+	WordCount 			int            `bson:"wordCount" json:"wordCount"`
+	Content 				string  			 `bson:"content" json:"content"`
+	Cover 				  string  			 `bson:"cover" json:"cover"`
+	Abstract 				string  			 `bson:"abstract" json:"abstract"`
+	Title 				  string  			 `bson:"title" json:"title"`
+	Status 				  string  			 `bson:"status" json:"status"`
+	Creator 	      User					 `bson:"creator" json:"creator"`
+	CreatedAt       time.Time      `bson:"createdAt" json:"createdAt"`
+	UpdatedAt       time.Time      `bson:"updatedAt" json:"updatedAt"`
 }
 
 func TranspileFeedModel(m bson.M) Feed {
