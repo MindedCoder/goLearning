@@ -1,3 +1,9 @@
+/**
+	include功能 包含include('creator')
+	include('creator.detail')  include('feed.creator.detail')以及更多层次
+	也涵盖了include('articles') 这样的数组形式的引用
+	//后续需要花时间异步请求
+ */
 package db
 
 import (
@@ -6,6 +12,7 @@ import (
 	"strings"
 )
 
+
 /**
 	may try loop 3 or more ,like creator.detail.school
  */
@@ -13,22 +20,36 @@ func IncludeObject(m bson.M, includes []string, db *mgo.Database) bson.M{
 	//first filter includes  due to include may be "creator.detail"
 	includeArray, includeMap := filterIncludes(includes)
 	for _, include := range includeArray{
-		var obj = bson.M{}
-		var ref = mgo.DBRef{}
-		data, _:= bson.Marshal(m[include])
-		bson.Unmarshal(data, &ref)
-		db.FindRef(&ref).One(&obj)
-		for _,value := range includeMap{
-			for _, subInclude := range value {
-				var subObj = bson.M{}
-				var subRef = mgo.DBRef{}
-				subData, _:= bson.Marshal(obj[subInclude])
-				bson.Unmarshal(subData, &subRef)
-				db.FindRef(&subRef).One(&subObj)
-				obj[subInclude] = subObj
-			}
+		var refs = []interface{}{}
+		var isArrayParameters = IsArray(m[include])
+		//include 可能会是一个数组，那就当做全是数组
+		if isArrayParameters {
+			refs = m[include].([]interface{})
+		} else {
+			refs = append(refs, m[include])
 		}
-		m[include] = obj
+		var defaultResults = []bson.M{}
+		//遍历ref获取值
+		for _, _r := range refs {
+			var obj = bson.M{}
+			var ref mgo.DBRef
+			data, _:= bson.Marshal(_r)
+			bson.Unmarshal(data, &ref)
+			db.FindRef(&ref).One(&obj)
+
+			for key, value := range includeMap{
+				if key == include {
+					obj = IncludeObject(obj, value, db)
+				}
+			}
+			defaultResults = append(defaultResults, obj)
+		}
+		//如果是数组，那么直接复制 非数组则取第一个值
+		if isArrayParameters {
+			m[include] = defaultResults
+		}else {
+			m[include] = defaultResults[0]
+		}
 	}
 	return m
 }
@@ -77,3 +98,4 @@ func removeDuplicatesAndEmpty(a []string) []string{
 	}
 	return ret
 }
+
