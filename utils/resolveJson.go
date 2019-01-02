@@ -34,3 +34,4 @@ func Json2map(str string, filterId bool) (s map[string]interface{}, err error) {
 	}
 	return bsonM, err
 }
+

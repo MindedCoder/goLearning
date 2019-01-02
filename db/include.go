@@ -10,6 +10,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 	"gopkg.in/mgo.v2"
 	"strings"
+	"goLearning/utils"
 )
 
 
@@ -43,7 +44,7 @@ func IncludeObject(m bson.M, includes []string, db *mgo.Database) bson.M{
 	includeArray, includeMap := filterIncludes(includes)
 	for _, include := range includeArray{
 		var refs = []interface{}{}
-		var isArrayParameters = IsArray(m[include])
+		var isArrayParameters = utils.IsArray(m[include])
 		//include 可能会是一个数组，那就当做全是数组
 		if isArrayParameters {
 			refs = m[include].([]interface{})

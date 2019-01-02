@@ -58,6 +58,8 @@ type Article struct {
 }
 
 func TranspileFeedModel(m bson.M) Feed {
+	//不转化纯粹的DBRef
+	//refMap := FindResonseDBRef(m)
 	data, _ := bson.Marshal(&m)
 	value := Feed{}
 	bson.Unmarshal(data, &value)

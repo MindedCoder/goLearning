@@ -47,6 +47,16 @@ func GetSessionInstance() *Operater{
 	return opInstance
 }
 
+func (op *Operater)GetDB() *mgo.Database{
+	return opInstance.mgo_db
+}
+
+func (op *Operater)FetchRef(ref mgo.DBRef) bson.M {
+	var obj = bson.M{}
+	op.mgo_db.FindRef(&ref).One(&obj)
+	return obj
+}
+
 func (op *Operater)QueryObject(queryModel models.QueryModel, params map[string]string) bson.M{
 	collection := op.mgo_db.C(params["className"])
 	mapInfo,_ := utils.Json2map(queryModel.Where, true)
@@ -105,7 +115,9 @@ func (op *Operater) DeleteObjects(params map[string]interface{}) error {
 
 func (op *Operater) AddObject(params map[string]interface{}) error  {
 	collection := op.mgo_db.C(params["className"].(string))
-	err := collection.Insert(params["document"])
+	delete(params, "className")
+	addParams := ConstructAddParams(params)
+	err := collection.Insert(addParams)
 	return  err
 }
 
@@ -130,10 +142,7 @@ func (op *Operater) UpdateObject(params map[string]interface{}) error  {
 	var id = params["objectId"]
 	delete(params, "objectId")
 	delete(params, "className")
-	err := collection.UpdateId(bson.ObjectIdHex(id.(string)), bson.M{"$set": params})
+	var updateParams = ConstructUpdateParams(params)
+	err := collection.UpdateId(bson.ObjectIdHex(id.(string)), updateParams)
 	return  err
 }
-
-//func (op *Operater) updateObjects(params map[string]string) error  {
-//
-//}

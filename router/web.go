@@ -8,9 +8,9 @@ import (
 func InitRouter() *gin.Engine {
 	router := gin.Default()
 	router.Use(utils.Cors())
-	ConstructUserPath(router)
-	ConstructFeedPath(router)
 	ConstructCommonPath(router)
-	ConstructTestPath(router)
+	//ConstructUserPath(router)
+	//ConstructFeedPath(router)
+	//ConstructTestPath(router)
 	return router
 }
