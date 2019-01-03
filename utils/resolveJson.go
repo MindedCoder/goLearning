@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"gopkg.in/mgo.v2/bson"
+	"gopkg.in/mgo.v2"
 )
 
 func Resolve() map[string]string{
@@ -26,9 +27,16 @@ func Json2map(str string, filterId bool) (s map[string]interface{}, err error) {
 	}
 	bsonM := bson.M{}
 	for key, value := range result {
-		if key == "objectId" {
+		if key == "objectId" && !IsMap(value) {
 			bsonM["_id"] = bson.ObjectIdHex(value.(string))
-		}else {
+		}else if IsMap(value) {
+			if value.(map[string]interface{})["__type"] == "Pointer" {
+				bsonM[key] = mgo.DBRef{
+					Id: bson.ObjectIdHex(value.(map[string]interface{})["objectId"].(string)),
+					Collection: value.(map[string]interface{})["className"].(string),
+				}
+			}
+ 		}else {
 			bsonM[key] = value
 		}
 	}

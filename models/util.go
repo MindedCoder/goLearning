@@ -7,22 +7,6 @@ import (
 )
 
 func FilterResult(m bson.M) map[string]interface{} {
-	delete(m, "ACL")
-	delete(m, "_r")
-	delete(m, "_w")
-	objectId := m["_id"]
-	delete(m, "_id")
-	if objectId != nil {
-		m["objectId"] = objectId
-	}
-	if m["createdAt"] != nil {
-		m["createdAt"] = m["createdAt"].(time.Time).UTC()
-	}
-
-	if m["updatedAt"] != nil {
-		m["updatedAt"] = m["updatedAt"].(time.Time).UTC()
-	}
-
 	var mapInfo = map[string]interface{}{}
 	for key, value := range m{
 		mapInfo[key] = value
@@ -84,6 +68,22 @@ func FilterResult(m bson.M) map[string]interface{} {
 				}
 			}
 		}
+	}
+
+	delete(mapInfo, "ACL")
+	delete(mapInfo, "_r")
+	delete(mapInfo, "_w")
+	objectId := mapInfo["_id"]
+	delete(mapInfo, "_id")
+	if objectId != nil {
+		mapInfo["objectId"] = objectId
+	}
+	if mapInfo["createdAt"] != nil {
+		mapInfo["createdAt"] = mapInfo["createdAt"].(time.Time).UTC()
+	}
+
+	if mapInfo["updatedAt"] != nil {
+		mapInfo["updatedAt"] = mapInfo["updatedAt"].(time.Time).UTC()
 	}
 	return mapInfo
 }

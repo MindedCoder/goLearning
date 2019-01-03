@@ -143,6 +143,7 @@ func (op *Operater) UpdateObject(params map[string]interface{}) error  {
 	delete(params, "objectId")
 	delete(params, "className")
 	var updateParams = ConstructUpdateParams(params)
+	fmt.Println("updateparams is ", updateParams)
 	err := collection.UpdateId(bson.ObjectIdHex(id.(string)), updateParams)
 	return  err
 }

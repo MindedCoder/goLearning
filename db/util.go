@@ -78,10 +78,29 @@ func ConstructUpdateParams(params bson.M) bson.M {
 			}
 		}
 	}
+	updateParams = filterNullMap(updateParams)
 	return updateParams
 }
 
-
+func filterNullMap(params bson.M) bson.M  {
+	inc := params["$inc"].(map[string]interface{})
+	set := params["$set"].(map[string]interface{})
+	unset := params["$unset"].(map[string]interface{})
+	addToSet := params["$addToSet"].(map[string]interface{})
+	if len(inc) == 0 {
+		delete(params, "$inc")
+	}
+	if len(set) == 0 {
+		delete(params, "$set")
+	}
+	if len(unset) == 0 {
+		delete(params, "$unset")
+	}
+	if len(addToSet) == 0 {
+		delete(params, "$addToSet")
+	}
+	return params
+}
 
 func ConstructAddParams(params bson.M) bson.M {
 	var addParams = bson.M{}

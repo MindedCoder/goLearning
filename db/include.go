@@ -71,7 +71,9 @@ func scanAndFetchRef(refs []interface{}, db *mgo.Database, include string, inclu
 		data, _:= bson.Marshal(_r)
 		bson.Unmarshal(data, &ref)
 		db.FindRef(&ref).One(&obj)
-		for key, value := range includeMap{
+		obj["__type"] = "Pointer"
+		obj["className"] = ref.Collection
+ 		for key, value := range includeMap{
 			if key == include {
 				obj = IncludeObject(obj, value, db)
 			}

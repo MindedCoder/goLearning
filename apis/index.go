@@ -67,6 +67,10 @@ func FetchObject(c *gin.Context)  {
 	}
 	oper := db.GetSessionInstance()
 	object := oper.FetchRef(ref)
+	if len(object) == 0 {
+		c.JSON(http.StatusOK, nil)
+		return
+	}
 	result := db.IncludeObject(object, strings.Split(queryModel.Include, ","), oper.GetDB())
 	value := models.FilterResult(result)
 	c.JSON(http.StatusOK, value)
@@ -79,6 +83,9 @@ func QueryObjects(c *gin.Context)  {
 	var params = map[string]string{
 		"className": className,
 	}
+	fmt.Println("className is ", className)
+	fmt.Println("querymodel is ", queryModel)
+	fmt.Println("QUERY is ", c.Request.URL.Query())
 	oper := db.GetSessionInstance()
 	result := oper.QueryObjects(queryModel, params)
 	c.JSON(http.StatusOK, gin.H{
