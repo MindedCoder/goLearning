@@ -69,7 +69,7 @@ func (op *Operater)QueryObject(queryModel models.QueryModel, params map[string]s
 	return IncludeObject(result, includes, opInstance.mgo_db)
 }
 
-func (op *Operater)QueryObjects(queryModel models.QueryModel, params map[string]string) []bson.M{
+func (op *Operater)QueryObjects(queryModel models.QueryModel, params map[string]string) bson.M{
 	collection := op.mgo_db.C(params["className"])
 	mapInfo, _ := utils.Json2map(queryModel.Where, true)
 	var result = []bson.M{}
@@ -81,6 +81,18 @@ func (op *Operater)QueryObjects(queryModel models.QueryModel, params map[string]
 	if queryModel.Skip > 0{
 		skip = queryModel.Skip
 	}
+	totalCnt := 0
+	if queryModel.Count == 1{
+		//说明客户端是想要计数
+		totalCnt,_ = collection.Find(mapInfo).Count()
+	}
+
+	if(queryModel.Limit == 0){
+		//说明客户端只想要计数
+		return bson.M{
+			"count": totalCnt,
+		}
+	}
 	m := []bson.M{
 		{"$match": mapInfo},
 		{"$limit": limit},
@@ -88,7 +100,11 @@ func (op *Operater)QueryObjects(queryModel models.QueryModel, params map[string]
 	}
 	collection.Pipe(m).All(&result)
 	includes := strings.Split(queryModel.Include, ",")
-	return IncludeObjects(result, includes, opInstance.mgo_db)
+
+	return bson.M{
+		"results": IncludeObjects(result, includes, opInstance.mgo_db),
+		"count": totalCnt,
+	}
 }
 
 func (op *Operater) DeleteObject(params map[string]string) error{

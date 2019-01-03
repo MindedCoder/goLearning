@@ -5,5 +5,6 @@ type QueryModel struct {
 	Include string 					  `form:"include"`
 	Skip    int 						`form:"skip"`
 	Limit   int								`form:"limit"`
+	Count   int								`form:"count"`
 	Order   string						`form:"order"`
 }

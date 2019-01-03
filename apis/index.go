@@ -83,14 +83,18 @@ func QueryObjects(c *gin.Context)  {
 	var params = map[string]string{
 		"className": className,
 	}
-	fmt.Println("className is ", className)
 	fmt.Println("querymodel is ", queryModel)
-	fmt.Println("QUERY is ", c.Request.URL.Query())
 	oper := db.GetSessionInstance()
 	result := oper.QueryObjects(queryModel, params)
-	c.JSON(http.StatusOK, gin.H{
-		"results": models.FilterResults(result),
-	})
+	if queryModel.Count == 1 {
+		c.JSON(http.StatusOK, gin.H{
+			"count": result["count"],
+		})
+	}else {
+		c.JSON(http.StatusOK, gin.H{
+			"results": models.FilterResults(result["results"].([]bson.M)),
+		})
+	}
 }
 
 //处理批量删除 新增 修改等
