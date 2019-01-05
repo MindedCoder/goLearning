@@ -28,8 +28,8 @@ type Feed struct {
 	Article 			  Article 		   `bson:"article" json:"article"`
 	Creator 	      User					 `bson:"creator" json:"creator"`
 	LikeUsers 	    []User				 `bson:"likeUsers" json:"likeUsers"`
-	PostedGroups 	  []Group				 `bson:"postedGroups" json:"postedGroups"`
-	ContributeGroups     []Group	 `bson:"contributeGroups" json:"contributeGroups"`
+	//PostedGroups 	  []Group				 `bson:"postedGroups" json:"postedGroups"`
+	//ContributeGroups     []Group	 `bson:"contributeGroups" json:"contributeGroups"`
 	Cover 	        string				 `bson:"cover" json:"cover"`
 	Abstract 	      string				 `bson:"abstract" json:"abstract"`
 	Title 	        string				 `bson:"title" json:"title"`

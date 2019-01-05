@@ -1,7 +1,7 @@
 package main
 import (
-	"goLearning/router"
 	"gopkg.in/mgo.v2"
+	"goLearning/router"
 )
 
 func main() {

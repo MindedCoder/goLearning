@@ -5,6 +5,9 @@ import (
 	"gopkg.in/mgo.v2"
 	"time"
 	"goLearning/utils"
+	"crypto"
+	"encoding/base64"
+	"math/rand"
 )
 
 func ConstructUpdateParams(params bson.M) bson.M {
@@ -162,4 +165,64 @@ func ConstructAddParams(params bson.M) bson.M {
 	addParams["createdAt"] = timeNow
 	addParams["updatedAt"] = timeNow
 	return addParams
+}
+
+func Encrypt(password string, salt string) string {
+	hasher := crypto.SHA512.New()
+	hasher.Write([]byte(salt))
+	hasher.Write([]byte(password))
+	hv := hasher.Sum(nil)
+	for i := 0 ; i < 512; i++ {
+		hasher.Reset()
+		hasher.Write(hv)
+		hv = hasher.Sum(nil)
+	}
+	base64String := base64.StdEncoding.EncodeToString(hv)
+	return base64String
+}
+
+// Salt 生成一个盐值
+func Salt(size int, needUpper bool) string {
+	// 按需要生成字符串
+	var result string
+	var funcLength = 2
+	if needUpper {
+		funcLength = 3
+	}
+	for i := 0; i < size; i++ {
+		randNumber := rand.Intn(funcLength)
+		switch randNumber {
+			case 0:
+				result += string(Number())
+				break
+			case 1:
+				result += string(Lower())
+				break
+			case 2:
+				result += string(Upper())
+				break
+			default:
+				break
+		}
+	}
+	return result
+}
+
+// Lower 随机生成小写字母
+func Lower() byte {
+	lowerhouse := []int{97, 122}
+	result := uint8(lowerhouse[0] + rand.Intn(26))
+	return result
+}
+// Number 随机生成数字
+func Number() byte {
+	numberhouse := []int{48, 57}
+	result := byte(numberhouse[0] + rand.Intn(10))
+	return result
+}
+// Lower 随机生成大写字母
+func Upper() byte {
+	upperhouse := []int{65, 90}
+	result := uint8(upperhouse[0] + rand.Intn(26))
+	return result
 }
