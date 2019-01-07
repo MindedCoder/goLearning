@@ -78,11 +78,10 @@ func FilterResult(m bson.M) map[string]interface{} {
 	if objectId != nil {
 		mapInfo["objectId"] = objectId
 	}
-	if mapInfo["createdAt"] != nil {
+	if mapInfo["createdAt"] != nil && utils.IsTime(mapInfo["createdAt"]) {
 		mapInfo["createdAt"] = mapInfo["createdAt"].(time.Time).UTC()
 	}
-
-	if mapInfo["updatedAt"] != nil {
+	if mapInfo["updatedAt"] != nil && utils.IsTime(mapInfo["updatedAt"]){
 		mapInfo["updatedAt"] = mapInfo["updatedAt"].(time.Time).UTC()
 	}
 	return mapInfo

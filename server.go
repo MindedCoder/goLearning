@@ -9,4 +9,5 @@ func main() {
 	mgo.SetStats(true)
 	rt := router.InitRouter()
 	rt.Run(":8080")
+
 }

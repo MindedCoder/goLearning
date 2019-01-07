@@ -34,3 +34,11 @@ func IsMap(i interface{}) bool {
 func IsBsonM(i interface{}) bool  {
 	return reflect.TypeOf(i).String() == "bson.M"
 }
+
+func IsString(i interface{}) bool  {
+	return reflect.TypeOf(i).String() == "string"
+}
+
+func IsTime(i interface{}) bool  {
+	return reflect.TypeOf(i).String() == "time.Time"
+}
