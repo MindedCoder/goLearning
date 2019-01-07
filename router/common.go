@@ -10,6 +10,7 @@ func ConstructCommonPath(router *gin.Engine){
 	router.GET("/1.1/classes/:object/:objectId", apis.FetchObject)
 	router.PUT("/1.1/classes/:object/:objectId", apis.UpdateObject)
 	router.GET("/1.1/classes/:object", apis.QueryObjects)
+	router.OPTIONS("/1.1/classes/:object", apis.QueryObjects)
 	router.DELETE("/1.1/classes/:object/:objectId", apis.DeleteObject)
 	router.POST("/1.1/batch", apis.Batch)
 }

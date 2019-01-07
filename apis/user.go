@@ -25,6 +25,7 @@ func FetchCurrentUserInfo(c *gin.Context)  {
 	user := oper.QueryObject(queryModel, params)
 	result := models.FilterResult(user)
 	delete(result, "password")
+	delete(result, "salt")
 	c.JSON(http.StatusOK, result)
 }
 
@@ -92,6 +93,7 @@ func Login(c *gin.Context)  {
 	}
 	result := models.FilterResult(user)
 	delete(result, "password")
+	delete(result, "salt")
 	c.JSON(http.StatusOK, result)
 }
 
@@ -139,25 +141,42 @@ func Register(c *gin.Context) {
 		return
 	}
 	//生成随机盐，然后生成加密密码保存
-	secretPassword := db.Encrypt(password.(string), db.Salt(48, false))
+	salt := db.Salt(48, false)
+	secretPassword := db.Encrypt(password.(string), salt)
+	objectId := bson.NewObjectId()
 	postPayload["password"] = secretPassword
 	postPayload["className"] = "_User"
+	postPayload["salt"] = salt
 	postPayload["sessionToken"] = db.Salt(25, false)
+	postPayload["_id"] = objectId
 	error := oper.AddObject(postPayload)
 
-	if error == nil {
-		//再查出来返回给客户端
-		user = oper.QueryObject(queryModel,className)
-		filterUser := models.FilterResult(user)
-		c.JSON(http.StatusCreated, gin.H{
-			"sessionToken": filterUser["sessionToken"],
-			"createdAt": filterUser["createdAt"],
-			"objectId": filterUser["objectId"],
+	if error != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code": 1,
+			"error": "server error",
 		})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"code": 1,
-		"error": "server error",
+	//再查出来返回给客户端
+	var ref = mgo.DBRef{
+		Collection: "_User",
+		Id: objectId,
+	}
+	user = oper.FetchRef(ref)
+	filterUser := models.FilterResult(user)
+	delete(filterUser, "password")
+	delete(filterUser, "salt")
+	c.Header("Location", "/1.1/users/" + objectId.String()) //前面得拼一个域名
+
+	fetchWhenSave := c.Query("fetchWhenSave")
+	if fetchWhenSave == "true"{
+		c.JSON(http.StatusCreated, filterUser)
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{
+		"sessionToken": filterUser["sessionToken"],
+		"createdAt": filterUser["createdAt"],
+		"objectId": filterUser["objectId"],
 	})
 }

@@ -43,6 +43,9 @@ func IncludeObject(m bson.M, includes []string, db *mgo.Database) bson.M{
 	//first filter includes  due to include may be "creator.detail"
 	includeArray, includeMap := filterIncludes(includes)
 	for _, include := range includeArray{
+		if m[include] == nil {
+			continue
+		}
 		var refs = []interface{}{}
 		var isArrayParameters = utils.IsArray(m[include])
 		//include 可能会是一个数组，那就当做全是数组

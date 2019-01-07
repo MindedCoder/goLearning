@@ -27,8 +27,23 @@ func Json2map(str string, filterId bool) (s map[string]interface{}, err error) {
 	}
 	bsonM := bson.M{}
 	for key, value := range result {
-		if key == "objectId" && !IsMap(value) {
-			bsonM["_id"] = bson.ObjectIdHex(value.(string))
+		if key == "objectId" {
+			if !IsMap(value){
+				bsonM["_id"] = bson.ObjectIdHex(value.(string))
+			}else {
+				// $in
+				for objKey, objValue := range value.(map[string]interface{}) {
+					if objKey == "$in" {
+						var objectIds = []bson.ObjectId{}
+						for _, id := range objValue.([]interface{}) {
+							objectIds = append(objectIds, bson.ObjectIdHex(id.(string)))
+						}
+						bsonM["_id"] = bson.M{
+							"$in": objectIds,
+						}
+					}
+				}
+			}
 		}else if IsMap(value) {
 			if value.(map[string]interface{})["__type"] == "Pointer" {
 				bsonM[key] = mgo.DBRef{

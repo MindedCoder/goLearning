@@ -85,12 +85,12 @@ func (op *Operater)QueryObjects(queryModel models.QueryModel, params map[string]
 	if queryModel.Count == 1{
 		//说明客户端是想要计数
 		totalCnt,_ = collection.Find(mapInfo).Count()
-	}
 
-	if(queryModel.Limit == 0){
-		//说明客户端只想要计数
-		return bson.M{
-			"count": totalCnt,
+		if(queryModel.Limit == 0){
+			//说明客户端只想要计数
+			return bson.M{
+				"count": totalCnt,
+			}
 		}
 	}
 	m := []bson.M{
@@ -160,6 +160,6 @@ func (op *Operater) UpdateObject(params map[string]interface{}) error  {
 	delete(params, "className")
 	var updateParams = ConstructUpdateParams(params)
 	fmt.Println("updateparams is ", updateParams)
-	err := collection.UpdateId(bson.ObjectIdHex(id.(string)), updateParams)
+	err := collection.UpdateId(id, updateParams)
 	return  err
 }
