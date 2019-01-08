@@ -23,8 +23,8 @@ func Resolve() map[string]string{
 	return value
 }
 
-func Json2map(str string, filterId bool) (s map[string]interface{}, err error) {
-	var result map[string]interface{}
+func Json2map(str string, filterId bool) (s bson.M, err error) {
+	var result bson.M
 	if err := json.Unmarshal([]byte(str), &result); err != nil {
 		return nil, err
 	}
@@ -36,7 +36,7 @@ func Json2map(str string, filterId bool) (s map[string]interface{}, err error) {
 		if IsMap(value) {
 			if key == "objectId" {
 				// $in
-				for objKey, objValue := range value.(map[string]interface{}) {
+				for objKey, objValue := range value.(bson.M) {
 					if objKey == "$in" {
 						var objectIds = []bson.ObjectId{}
 						for _, id := range objValue.([]interface{}) {
@@ -48,23 +48,23 @@ func Json2map(str string, filterId bool) (s map[string]interface{}, err error) {
 					}
 				}
 			}else {
-				if value.(map[string]interface{})["__type"] == "Pointer" {
+				if value.(bson.M)["__type"] == "Pointer" {
 					bsonM[key] = mgo.DBRef{
-						Id: bson.ObjectIdHex(value.(map[string]interface{})["objectId"].(string)),
-						Collection: value.(map[string]interface{})["className"].(string),
+						Id: bson.ObjectIdHex(value.(bson.M)["objectId"].(string)),
+						Collection: value.(bson.M)["className"].(string),
 					}
 				}else {
 					//需要注意的是时间格式 客户端传过来的是createdAt:map[$lt:map[__type:Date iso:2019-01-08T08:00:24.240Z]]
-					timeLessMap := value.(map[string]interface{})["$lt"]
-					timeGreaterMap := value.(map[string]interface{})["$gt"]
-					if timeLessMap != nil {
-						t,_ := time.Parse(ISO_TIME_FORMAT, timeLessMap.(map[string]interface{})["iso"].(string))
-						value.(map[string]interface{})["$lt"] = time.Time.Local(t)
+					timeLessMap := value.(bson.M)["$lt"]
+					timeGreaterMap := value.(bson.M)["$gt"]
+					if timeLessMap != nil && timeLessMap.(bson.M)["__Type"] == "Date"{
+						t,_ := time.Parse(ISO_TIME_FORMAT, timeLessMap.(bson.M)["iso"].(string))
+						value.(bson.M)["$lt"] = time.Time.Local(t)
 						bsonM[key] = value
 					}
-					if timeGreaterMap != nil {
-						t,_ := time.Parse(ISO_TIME_FORMAT, timeGreaterMap.(map[string]interface{})["iso"].(string))
-						value.(map[string]interface{})["$gt"] = time.Time.Local(t)
+					if timeGreaterMap != nil && timeGreaterMap.(bson.M)["__Type"] == "Date"{
+						t,_ := time.Parse(ISO_TIME_FORMAT, timeGreaterMap.(bson.M)["iso"].(string))
+						value.(bson.M)["$gt"] = time.Time.Local(t)
 						bsonM[key] = value
 					}
 					bsonM[key] = value
