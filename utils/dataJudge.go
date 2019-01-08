@@ -58,7 +58,7 @@ func IsTime(i interface{}) bool  {
 }
 
 func IsArray(i interface{}) bool  {
-	if i == nil {return false}git
+	if i == nil {return false}
 	var str = reflect.TypeOf(i).String()
 	str = str[0 : 2]
 	if str == "[]"{
