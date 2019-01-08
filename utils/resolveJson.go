@@ -63,7 +63,7 @@ func Json2map(str string, filterId bool) (s map[string]interface{}, err error) {
 						bsonM[key] = value
 					}
 					if timeGreaterMap != nil {
-						t,_ := time.Parse(ISO_TIME_FORMAT, timeLessMap.(map[string]interface{})["iso"].(string))
+						t,_ := time.Parse(ISO_TIME_FORMAT, timeGreaterMap.(map[string]interface{})["iso"].(string))
 						value.(map[string]interface{})["$gt"] = time.Time.Local(t)
 						bsonM[key] = value
 					}
