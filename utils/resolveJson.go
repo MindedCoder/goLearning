@@ -6,7 +6,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 	"gopkg.in/mgo.v2"
 	"time"
-	"12kmGrowthService/utils"
+	"goLearning/db"
 )
 
 func Resolve() map[string]string{
@@ -54,12 +54,12 @@ func Json2map(str string, filterId bool) (s map[string]interface{}, err error) {
 					timeLessMap := value.(map[string]interface{})["$lt"]
 					timeGreaterMap := value.(map[string]interface{})["$gt"]
 					if timeLessMap != nil {
-						t,_ := time.Parse(utils.ISO_TIME_FORMAT, timeLessMap.(map[string]interface{})["iso"].(string))
+						t,_ := time.Parse(db.ISO_TIME_FORMAT, timeLessMap.(map[string]interface{})["iso"].(string))
 						value.(map[string]interface{})["$lt"] = time.Time.Local(t)
 						bsonM[key] = value
 					}
 					if timeGreaterMap != nil {
-						t,_ := time.Parse(utils.ISO_TIME_FORMAT, timeLessMap.(map[string]interface{})["iso"].(string))
+						t,_ := time.Parse(db.ISO_TIME_FORMAT, timeLessMap.(map[string]interface{})["iso"].(string))
 						value.(map[string]interface{})["$gt"] = time.Time.Local(t)
 						bsonM[key] = value
 					}

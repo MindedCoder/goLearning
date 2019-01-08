@@ -10,6 +10,11 @@ import (
 	"math/rand"
 )
 
+const (
+	ISO_TIME_FORMAT = "2006-01-02T15:04:05.999Z"
+)
+
+
 func ConstructUpdateParams(params bson.M) bson.M {
 	var updateParams = bson.M{
 		"$set": map[string]interface{}{},
