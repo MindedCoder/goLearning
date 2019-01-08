@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"gopkg.in/mgo.v2/bson"
 	"gopkg.in/mgo.v2"
+	"time"
+	"12kmGrowthService/utils"
 )
 
 func Resolve() map[string]string{
@@ -27,10 +29,8 @@ func Json2map(str string, filterId bool) (s map[string]interface{}, err error) {
 	}
 	bsonM := bson.M{}
 	for key, value := range result {
-		if key == "objectId" {
-			if !IsMap(value){
-				bsonM["_id"] = bson.ObjectIdHex(value.(string))
-			}else {
+		if IsMap(value) {
+			if key == "objectId" {
 				// $in
 				for objKey, objValue := range value.(map[string]interface{}) {
 					if objKey == "$in" {
@@ -43,18 +43,35 @@ func Json2map(str string, filterId bool) (s map[string]interface{}, err error) {
 						}
 					}
 				}
-			}
-		}else if IsMap(value) {
-			if value.(map[string]interface{})["__type"] == "Pointer" {
-				bsonM[key] = mgo.DBRef{
-					Id: bson.ObjectIdHex(value.(map[string]interface{})["objectId"].(string)),
-					Collection: value.(map[string]interface{})["className"].(string),
+			}else {
+				if value.(map[string]interface{})["__type"] == "Pointer" {
+					bsonM[key] = mgo.DBRef{
+						Id: bson.ObjectIdHex(value.(map[string]interface{})["objectId"].(string)),
+						Collection: value.(map[string]interface{})["className"].(string),
+					}
+				}else {
+					//需要注意的是时间格式 客户端传过来的是createdAt:map[$lt:map[__type:Date iso:2019-01-08T08:00:24.240Z]]
+					timeLessMap := value.(map[string]interface{})["$lt"]
+					timeGreaterMap := value.(map[string]interface{})["$gt"]
+					if timeLessMap != nil {
+						t,_ := time.Parse(utils.ISO_TIME_FORMAT, timeLessMap.(map[string]interface{})["iso"].(string))
+						value.(map[string]interface{})["$lt"] = time.Time.Local(t)
+						bsonM[key] = value
+					}
+					if timeGreaterMap != nil {
+						t,_ := time.Parse(utils.ISO_TIME_FORMAT, timeLessMap.(map[string]interface{})["iso"].(string))
+						value.(map[string]interface{})["$gt"] = time.Time.Local(t)
+						bsonM[key] = value
+					}
+					bsonM[key] = value
 				}
+			}
+		}else {
+			if key == "objectId" {
+				bsonM["_id"] = bson.ObjectIdHex(value.(string))
 			}else {
 				bsonM[key] = value
 			}
- 		}else {
-			bsonM[key] = value
 		}
 	}
 	return bsonM, err

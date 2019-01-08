@@ -93,14 +93,16 @@ func (op *Operater)QueryObjects(queryModel models.QueryModel, params map[string]
 			}
 		}
 	}
+	fmt.Println("limit is ", limit)
+	fmt.Println("skip is ", skip)
+	fmt.Println("mapInfo is ", mapInfo)
+	fmt.Println("model is ", queryModel)
 	if queryModel.Order == ""{
 		collection.Find(mapInfo).Skip(skip).Limit(limit).All(&result)
 	}else {
 		collection.Find(mapInfo).Skip(skip).Limit(limit).Sort(queryModel.Order).All(&result)
 	}
-
 	includes := strings.Split(queryModel.Include, ",")
-
 	return bson.M{
 		"results": IncludeObjects(result, includes, opInstance.mgo_db),
 		"count": totalCnt,
