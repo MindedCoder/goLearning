@@ -50,6 +50,8 @@ func Json2map(str string, filterId bool) (s map[string]interface{}, err error) {
 					Id: bson.ObjectIdHex(value.(map[string]interface{})["objectId"].(string)),
 					Collection: value.(map[string]interface{})["className"].(string),
 				}
+			}else {
+				bsonM[key] = value
 			}
  		}else {
 			bsonM[key] = value

@@ -93,12 +93,7 @@ func (op *Operater)QueryObjects(queryModel models.QueryModel, params map[string]
 			}
 		}
 	}
-	m := []bson.M{
-		{"$match": mapInfo},
-		{"$limit": limit},
-		{"$skip" : skip},
-	}
-	collection.Pipe(m).All(&result)
+	collection.Find(mapInfo).Skip(skip).Limit(limit).Sort(queryModel.Order).All(&result)
 	includes := strings.Split(queryModel.Include, ",")
 
 	return bson.M{

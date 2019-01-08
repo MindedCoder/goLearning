@@ -226,3 +226,16 @@ func Upper() byte {
 	result := uint8(upperhouse[0] + rand.Intn(26))
 	return result
 }
+
+func DealWithSort(sort string) bson.M {
+	if sort == "" {return  bson.M{}}
+	if sort[0: 1] == "-"{
+		var key = sort[1 : len(sort)]
+		return  bson.M{
+			key: -1,
+		}
+	}
+	return bson.M{
+		sort: 1,
+	}
+}
