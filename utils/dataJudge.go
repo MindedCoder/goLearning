@@ -43,18 +43,22 @@ func IsMap(i interface{}) bool {
 }
 
 func IsBsonM(i interface{}) bool  {
+	if i == nil {return false}
 	return reflect.TypeOf(i).String() == "bson.M"
 }
 
 func IsString(i interface{}) bool  {
+	if i == nil {return false}
 	return reflect.TypeOf(i).String() == "string"
 }
 
 func IsTime(i interface{}) bool  {
+	if i == nil {return false}
 	return reflect.TypeOf(i).String() == "time.Time"
 }
 
 func IsArray(i interface{}) bool  {
+	if i == nil {return false}git
 	var str = reflect.TypeOf(i).String()
 	str = str[0 : 2]
 	if str == "[]"{
