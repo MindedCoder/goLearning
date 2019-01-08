@@ -93,10 +93,6 @@ func (op *Operater)QueryObjects(queryModel models.QueryModel, params map[string]
 			}
 		}
 	}
-	fmt.Println("limit is ", limit)
-	fmt.Println("skip is ", skip)
-	fmt.Println("mapInfo is ", mapInfo)
-	fmt.Println("model is ", queryModel)
 	if queryModel.Order == ""{
 		collection.Find(mapInfo).Skip(skip).Limit(limit).All(&result)
 	}else {
