@@ -57,12 +57,12 @@ func Json2map(str string, filterId bool) (s map[string]interface{}, err error) {
 					//需要注意的是时间格式 客户端传过来的是createdAt:map[$lt:map[__type:Date iso:2019-01-08T08:00:24.240Z]]
 					timeLessMap := value.(map[string]interface{})["$lt"]
 					timeGreaterMap := value.(map[string]interface{})["$gt"]
-					if timeLessMap != nil && timeLessMap.(bson.M)["__Type"] == "Date"{
+					if timeLessMap != nil && IsMap(timeLessMap) && timeLessMap.(map[string]interface{})["__Type"] == "Date"{
 						t,_ := time.Parse(ISO_TIME_FORMAT, timeLessMap.(map[string]interface{})["iso"].(string))
 						value.(map[string]interface{})["$lt"] = time.Time.Local(t)
 						bsonM[key] = value
 					}
-					if timeGreaterMap != nil && timeGreaterMap.(bson.M)["__Type"] == "Date"{
+					if timeGreaterMap != nil && IsMap(timeGreaterMap)  && timeGreaterMap.(map[string]interface{})["__Type"] == "Date"{
 						t,_ := time.Parse(ISO_TIME_FORMAT, timeGreaterMap.(map[string]interface{})["iso"].(string))
 						value.(map[string]interface{})["$gt"] = time.Time.Local(t)
 						bsonM[key] = value
