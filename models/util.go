@@ -5,7 +5,10 @@ import (
 	"goLearning/utils"
 	"time"
 )
-
+/**
+	DBref数组应当是断言为[]interface{}，[]map[string]interface就应该还往里面循环
+	这里面有坑  待更加熟悉golang后来优化
+ */
 func FilterResult(m bson.M) map[string]interface{} {
 	var mapInfo = map[string]interface{}{}
 	for key, value := range m{
@@ -30,41 +33,40 @@ func FilterResult(m bson.M) map[string]interface{} {
 			}
 		}
 		if utils.IsArray(value) {
-			//判断是否为DBRef 数组
-			var isDBRef = false
-			var isBsonM = false
-			for _, item := range value.([]interface{}) {
-				if utils.IsBsonM(item) {
-					isBsonM = true
-					for refKey, _ := range item.(bson.M) {
-						if refKey == "$id" || refKey == "$ref" {
-							isDBRef = true
-							break
-						}
-					}
-				}
-				//默认为数组里面都是同一类型
-				break
-			}
-			if isDBRef {
-				var refs = []map[string]interface{}{}
-				for _, item := range value.([]interface{}) {
-					ref := map[string]interface{}{
-						"objectId": item.(bson.M)["$id"].(bson.ObjectId).Hex(),
-						"className": item.(bson.M)["$ref"].(string),
-						"__type": "Pointer",
-					}
-					refs = append(refs, ref)
-				}
-				mapInfo[key] = refs
-			}else {
-				if isBsonM {
-					var datas = []map[string]interface{}{}
-					for _, item := range value.([]interface{}) {
-						data := FilterResult(item.(bson.M))
+			//是否maps数组
+			if utils.IsMapArray(value) {
+					var datas = []bson.M{}
+					for _, item := range value.([]bson.M) {
+						data := FilterResult(item)
 						datas = append(datas, data)
 					}
 					mapInfo[key] = datas
+			}else if utils.IsInterfaceArray(value) {
+				//判断是否为DBRef 数组
+				var isDBRef = false
+				for _, item := range value.([]interface{}) {
+					if utils.IsBsonM(item) {
+						for refKey, _ := range item.(bson.M) {
+							if refKey == "$id" || refKey == "$ref" {
+								isDBRef = true
+								break
+							}
+						}
+					}
+					//默认为数组里面都是同一类型
+					break
+				}
+				if isDBRef {
+					var refs = []map[string]interface{}{}
+					for _, item := range value.([]interface{}) {
+						ref := map[string]interface{}{
+							"objectId": item.(bson.M)["$id"].(bson.ObjectId).Hex(),
+							"className": item.(bson.M)["$ref"].(string),
+							"__type": "Pointer",
+						}
+						refs = append(refs, ref)
+					}
+					mapInfo[key] = refs
 				}
 			}
 		}

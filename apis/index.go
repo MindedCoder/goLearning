@@ -117,14 +117,9 @@ func QueryObjects(c *gin.Context)  {
 	var params = map[string]string{
 		"className": className,
 	}
-	fmt.Println("querymodel is ", queryModel)
 	oper := db.GetSessionInstance()
 	result := oper.QueryObjects(queryModel, params)
 
-	if result["results"] == nil {
-		fmt.Println("className is ", className)
-		fmt.Println("queryModel is ", queryModel)
-	}
 	if queryModel.Count == 1 {
 		c.JSON(http.StatusOK, gin.H{
 			"count": result["count"],

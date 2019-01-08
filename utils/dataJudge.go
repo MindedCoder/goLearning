@@ -1,6 +1,9 @@
 package utils
 
-import "reflect"
+import (
+	"reflect"
+	"gopkg.in/mgo.v2/bson"
+)
 
 func T(i interface{}) string{    //函数t 有一个参数i
 	switch i.(type) { //多选语句switch
@@ -14,7 +17,7 @@ func T(i interface{}) string{    //函数t 有一个参数i
 	return ""
 }
 
-func IsArray(i interface{}) bool {
+func IsInterfaceArray(i interface{}) bool {
 	switch i.(type) {
 	case []interface{}:
 		return true
@@ -22,6 +25,14 @@ func IsArray(i interface{}) bool {
 	return false
 }
 
+func IsMapArray(i interface{}) bool  {
+	switch i.(type) {
+	case []map[string]interface{}:
+	case []bson.M:
+		return true
+	}
+	return false
+}
 
 func IsMap(i interface{}) bool {
 	switch i.(type) {
@@ -42,3 +53,26 @@ func IsString(i interface{}) bool  {
 func IsTime(i interface{}) bool  {
 	return reflect.TypeOf(i).String() == "time.Time"
 }
+
+func IsArray(i interface{}) bool  {
+	var str = reflect.TypeOf(i).String()
+	str = str[0 : 2]
+	if str == "[]"{
+		return true
+	}
+	return false
+}
+
+//func IsArray(i interface{}) bool {
+//	switch i.(type) {
+//	case []interface {}:
+//	case []string:
+//	case []int:
+//	case []float64:
+//	case []time.Time:
+//	case []map[string]string:
+//	case []map[string]interface {}:
+//		return true
+//	}
+//	return false
+//}
