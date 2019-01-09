@@ -10,7 +10,6 @@ import(
 	"strings"
 	"time"
 	"encoding/json"
-	"fmt"
 )
 
 func AddObject(c *gin.Context)  {
