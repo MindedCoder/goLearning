@@ -23,15 +23,17 @@ func Resolve() map[string]string{
 	return value
 }
 
-func Json2map(str string, filterId bool) (s map[string]interface{}, err error) {
+func Json2map(str string, filterId bool) (s map[string]interface{}, err error, pointerKey string) {
 	var result map[string]interface{}
 	if err := json.Unmarshal([]byte(str), &result); err != nil {
-		return nil, err
+		return nil, err, ""
 	}
+
 	if !filterId {
-		return result, nil
+		return result, nil, ""
 	}
 	bsonM := bson.M{}
+	pointerKey = ""
 	for key, value := range result {
 		if IsMap(value) {
 			if key == "objectId" {
@@ -53,6 +55,7 @@ func Json2map(str string, filterId bool) (s map[string]interface{}, err error) {
 						Id: bson.ObjectIdHex(value.(map[string]interface{})["objectId"].(string)),
 						Collection: value.(map[string]interface{})["className"].(string),
 					}
+					pointerKey = key
 				}else {
 					bsonM[key] = value
 
@@ -79,6 +82,6 @@ func Json2map(str string, filterId bool) (s map[string]interface{}, err error) {
 			}
 		}
 	}
-	return bsonM, err
+	return bsonM, err, pointerKey
 }
 

@@ -239,3 +239,14 @@ func DealWithSort(sort string) bson.M {
 		sort: 1,
 	}
 }
+
+func IsStringInArray(array []string, str string) bool {
+	isIn := false
+	for _, value := range array {
+		if value == str {
+			isIn = true
+			break
+		}
+	}
+	return isIn
+}

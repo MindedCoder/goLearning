@@ -59,7 +59,7 @@ func (op *Operater)FetchRef(ref mgo.DBRef) bson.M {
 
 func (op *Operater)QueryObject(queryModel models.QueryModel, params map[string]string) bson.M{
 	collection := op.mgo_db.C(params["className"])
-	mapInfo,_ := utils.Json2map(queryModel.Where, true)
+	mapInfo,_,_ := utils.Json2map(queryModel.Where, true)
 	var result = bson.M{}
 	m := []bson.M{
 		{"$match": mapInfo},
@@ -71,7 +71,32 @@ func (op *Operater)QueryObject(queryModel models.QueryModel, params map[string]s
 
 func (op *Operater)QueryObjects(queryModel models.QueryModel, params map[string]string) bson.M{
 	collection := op.mgo_db.C(params["className"])
-	mapInfo, _ := utils.Json2map(queryModel.Where, true)
+	mapInfo, _, pointerKey := utils.Json2map(queryModel.Where, true)
+
+	//查询是否含有relation字段  relation 也是通过pointer来展现
+	if pointerKey != "" {
+		names, _ :=op.mgo_db.CollectionNames()
+		tableName := "_Join:" + mapInfo[pointerKey].(mgo.DBRef).Collection + ":" + pointerKey + ":" + params["className"]
+		if IsStringInArray(names, tableName) {
+			//证明是真的存在 那就得先查出该关联表中所有的params["className"]的DBRef
+			relationCollection := op.mgo_db.C(tableName)
+			relationRefs := []bson.M{}
+			relationCollection.Find(bson.M{
+				"relatedId": mapInfo[pointerKey],
+			}).All(&relationRefs)
+			ids := []bson.ObjectId{}
+			for _, item := range relationRefs {
+				owningId := item["owningId"]
+				ids = append(ids, owningId.(bson.M)["$id"].(bson.ObjectId))
+			}
+			//再往mapInfo中放入In
+			mapInfo["_id"] = bson.M{
+				"$in": ids,
+			}
+			//再删掉之前的pointerKey
+			delete(mapInfo, pointerKey)
+		}
+	}
 	var result = []bson.M{}
 	var limit = 10
 	var skip = 0
