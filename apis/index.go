@@ -10,6 +10,7 @@ import(
 	"strings"
 	"time"
 	"encoding/json"
+	"fmt"
 )
 
 func AddObject(c *gin.Context)  {
@@ -169,6 +170,11 @@ func doBatchRequest(request interface{}) bson.M{
 
 func doBatchQuery(className string, params map[string]interface{}) bson.M{
 	var queryModel models.QueryModel
+	where := ""
+	if params["where"] != nil {
+		_where ,_ := json.Marshal(params["where"])
+		where = string(_where)
+	}
 	js, error := json.Marshal(params)
 	if error != nil {
 		return bson.M{
@@ -179,11 +185,14 @@ func doBatchQuery(className string, params map[string]interface{}) bson.M{
 		}
 	}
 	json.Unmarshal(js, &queryModel)
+	queryModel.Where = where
 	oper := db.GetSessionInstance()
 	result := oper.QueryObjects(queryModel, map[string]string{
 		"className": className,
 	})
 	return bson.M{
-		"success": models.FilterResult(result),
+		"success": bson.M{
+			"results": models.FilterResults(result["results"].([]bson.M)),
+		},
 	}
 }

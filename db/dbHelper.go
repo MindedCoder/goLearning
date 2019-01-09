@@ -97,6 +97,7 @@ func (op *Operater)QueryObjects(queryModel models.QueryModel, params map[string]
 			delete(mapInfo, pointerKey)
 		}
 	}
+	//fmt.Println("mapInfo is ", mapInfo)
 	var result = []bson.M{}
 	var limit = 10
 	var skip = 0
