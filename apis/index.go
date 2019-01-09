@@ -10,6 +10,7 @@ import(
 	"strings"
 	"fmt"
 	"time"
+	"encoding/json"
 )
 
 func AddObject(c *gin.Context)  {
@@ -134,8 +135,56 @@ func QueryObjects(c *gin.Context)  {
 //处理批量删除 新增 修改等
 func Batch(c *gin.Context)  {
 	params := TranspilePostParams(c)
-	fmt.Print("params is ", params)
-	c.JSON(http.StatusOK, gin.H{
-		"status": "ok",
+	requests := params["requests"]
+	var objects = []bson.M{}
+	objectChans := make([]chan bson.M, len(requests.([]interface{})))
+	for i, request := range requests.([]interface{}) {
+		objectChans[i] = make(chan bson.M)
+		go func(k int, request interface{}) {
+			data :=  doBatchRequest(request)
+			objectChans[k] <- data
+		}(i, request)
+	}
+	for _, ch := range objectChans {
+		data := <-ch
+		objects = append(objects, data)
+	}
+	c.JSON(http.StatusOK, objects)
+}
+
+func doBatchRequest(request interface{}) bson.M{
+	var method = request.(map[string]interface{})["method"]
+	var params = request.(map[string]interface{})["params"]
+	var path = request.(map[string]interface{})["path"]
+	pathArray := strings.Split(path.(string), "/")
+	className := pathArray[len(pathArray) - 1]
+	switch method {
+		case "GET":
+			return doBatchQuery(className, params.(map[string]interface{}))
+			break
+	default:
+		break
+	}
+	return bson.M{}
+}
+
+func doBatchQuery(className string, params map[string]interface{}) bson.M{
+	var queryModel models.QueryModel
+	js, error := json.Marshal(params)
+	if error != nil {
+		return bson.M{
+			"error": bson.M{
+				"code": 1,
+				"error": "params error",
+			},
+		}
+	}
+	json.Unmarshal(js, &queryModel)
+	oper := db.GetSessionInstance()
+	result := oper.QueryObjects(queryModel, map[string]string{
+		"className": className,
 	})
+	return bson.M{
+		"success": models.FilterResult(result),
+	}
 }
